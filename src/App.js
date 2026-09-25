@@ -3,22 +3,37 @@ const express=require('express')
 
 const app=express()
 
+// app.use("/user",(req,res)=>
+// {
+//     res.send("this is user hello ")
+// })
 
-app.use("/",(req,res)=>
+app.get("/user",(req,res)=>
 {
-    res.send("hello my express  you are in rot ")
+    res.send({firstname:"ajay",lastname:"rawar"})
 })
 
-app.use("/test",(req,res)=>
+app.patch("/user",(req,res)=>
 {
-    res.send("hello my express bhai mere kahan h ..you are in ")
+    //  console.log("user updated success");
+    res.send("user updated success")
+    
+})
+
+app.delete("/user",(req,res)=>
+{
+    res.send("deleted success")
+})
+
+app.post('/user',(req,res)=>
+{
+res.send("posted successfully")
 })
 
 
-app.use("/apply",(req,res)=>
-{
-    res.send("hello my express  ")
-})
+
+
+
 
 app.listen(5300,()=>
 {
