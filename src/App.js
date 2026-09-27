@@ -1,5 +1,6 @@
 
 const express=require('express')
+  const {AdminAuth,UserAuth}=require('./middlewares/Auth')
 
 const app=express()
 
@@ -10,24 +11,50 @@ const app=express()
 
 //app.use("/user",[rh1,rh2,rh3])
 
+app.use('/user',UserAuth,(req,res)=>
+{
+  res.send ("this is user auth")
+})
 
-app.get('/user/:id', (req, res,next) => { 
-    console.log(req.params)
+
+
+app.get('/admin',AdminAuth)                        //this is clean way of writing middlewares
+
+app.get('/admin/getdata',(req,res)=>
+{
+    res.send("getdata is ready   ") 
+})
+
+
+
+
+
+
+// //these are the two ways we can  define routes 1. next to route handler 2. make another route  
+// app.use('/',(req,res,next)=>
+// {
+//    console.log('you are in /use method ')
+//    next()
+// })
+
+// app.get('/user', (req, res,next) => { 
+//     console.log(req.params)
     
-    next()
-    res.send(`tehese ${req.params.id}`)  // it will give error 
-},(req,res,next)=>
-{
-    console.log("2nsd  response")
-next()
-},(req,res,next)=>
-{
-console.log("3rdd respniosn")
-next()
-},(req,res)=>
-{
-res.send("4th response")
-});
+//     next()
+//     //res.send(`tehese ${req.params.id}`)  // it will give error 
+// },(req,res,next)=>
+// {
+//     console.log("2nsd  response")
+// next()
+// },(req,res,next)=>
+// {
+// console.log("3rdd respniosn")
+// //res.send('3rdd respniosn')
+// next()
+// },(req,res)=>
+// {
+// res.send("4th response")
+// });
 
 
 
