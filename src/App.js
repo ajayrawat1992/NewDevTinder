@@ -30,6 +30,19 @@ res.send(user)
    }
    
 })
+app.delete('/user',async (req,res)=>
+{
+    const id=req.body.userid
+
+    try
+    {
+         const user=await User.findByIdAndDelete({_id:id})
+        //const user=await User.findByIdAndDelete(id)
+        res.send("deleted success")
+    }
+    catch(err)
+    {res.status(400).send("sme error")} 
+})
 
 app.get('/feed',async(req,res)=>
 {
@@ -42,11 +55,7 @@ const users=await User.find({})
   }
 })
 
-
-
-
-
-     app.post('/signup',async(req,res)=>
+app.post('/signup',async(req,res)=>
     {
        //console.log(req.body)
         const user=new User(req.body);
@@ -57,6 +66,22 @@ const users=await User.find({})
       catch(err){res.status(500).send("some error" + err.message)}
     })
 
+
+app.patch('/user',async(req,res)=>
+    {
+        const id=req.body.userid
+        const data=req.body
+        console.log(data);
+        
+try{
+const user=await User.findByIdAndUpdate({_id:id} ,data)
+res.send("updated success")
+}
+catch(err)
+{
+    res.status(400).send("not found")
+}
+    })
 
 
 connectDb()
