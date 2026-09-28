@@ -6,14 +6,12 @@ const express=require('express')
 
 const app=express()
 
+app.use(express.json())     //this is the middleware which will run for all the methods and it converts incoming json datacoming from end user(who is hittng the API like browser,Postman) to js object   
+
      app.post('/signup',async(req,res)=>
     {
-        const user=new User({      // here we have created a new instance of User model
-            firstName:"llaksha",
-            lastname:"ruman",
-            emailid:"hghja@yahooo.com",
-            password:"56789"
-        });
+       //console.log(req.body)
+        const user=new User(req.body);
       try{                            // always wrap inside try catch block whenever making any database connections.
          await user.save()          // it returns promise .so we used async await
          res.send("saved successfully")
