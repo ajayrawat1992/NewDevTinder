@@ -1,63 +1,39 @@
 
 const express=require('express')
   //const {AdminAuth,UserAuth}=require('./middlewares/Auth')
+ const connectDb= require('./config/database')
+   const User=  require('./models/user')
 
 const app=express()
 
-
-
-//error handling using express.  but the good is to use Always use try catch  .using it ..it will not go to another route
-
-
-app.get('/getalldata',(req,res)=>
-{
-    try{
-        throw new Error("iuwgdsjkgdkabkd")
-  res.send("user data sent")
-}
-    catch (err){
-   res.status(500).send("something awful")
-    }
-})
-
-app.use('/',(err,req,res,next)=>      //always write this  at the end 
-{
-    if(err)
+     app.post('/signup',async(req,res)=>
     {
-        res.status(500).send("some trype od  error")
-    }
-})
+        const user=new User({      // here we have created a new instance of User model
+            firstName:"llaksha",
+            lastname:"ruman",
+            emailid:"hghja@yahooo.com",
+            password:"56789"
+        });
+      try{                            // always wrap inside try catch block whenever making any database connections.
+         await user.save()          // it returns promise .so we used async await
+         res.send("saved successfully")
+      }
+      catch(err){res.status(500).send("some error" + err.message)}
+    })
 
 
 
-
-
-app.get('/user/',(req,res)=>
-{
-   // console.log(req.query)         ///gives parameter after(?) ex /user?userid=13569871
-    res.send(` heloo checkkkkkk`)   
-})
-
-
-app.patch("/user",(req,res)=>
-{
-    //  console.log("user updated success");
-    res.send("user updated success")
-    
-})
-
-app.delete("/user",(req,res)=>
-{
-    res.send("deleted success")
-})
-
-app.post('/user',(req,res)=>
-{
-res.send("posted successfully")
-})
-
-
-app.listen(5300,()=>
+connectDb()
+.then(()=>{
+    console.log("database connected")
+     app.listen(5300,()=>
 {
     console.log("sever created successfully at port 5300")
 })
+    })
+.catch(err=>console.log("database not connected"))
+
+
+
+// here first database is created then started the application(or listen port) .that is why we have written code of promise here 
+//otherwise vice-versa can create problems
