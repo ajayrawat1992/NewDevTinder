@@ -57,7 +57,7 @@ const users=await User.find({})
 
 app.post('/signup',async(req,res)=>
     {
-       //console.log(req.body)
+       console.log(req.body)
         const user=new User(req.body);
       try{                            // always wrap inside try catch block whenever making any database connections.
          await user.save()          // it returns promise .so we used async await
@@ -74,14 +74,28 @@ app.patch('/user',async(req,res)=>
         console.log(data);
         
 try{
-const user=await User.findByIdAndUpdate({_id:id} ,data)
+const user=await User.findByIdAndUpdate({_id:id} ,data,{runValidators:true})  //by default runvalidators is off validate function run on new document not updations by default.we have to enable it on updates also
 res.send("updated success")
 }
 catch(err)
 {
-    res.status(400).send("not found")
+    res.status(400).send("not found "+err.message)
 }
     })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 connectDb()
