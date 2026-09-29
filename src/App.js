@@ -71,12 +71,31 @@ app.patch('/user',async(req,res)=>
     {
         const id=req.body.userid
         const data=req.body
-        console.log(data);
+        console.log(data);     
         
 try{
+     const ALLOWED_UPDATES=['userid',"password","about","skills"]  // if i dont want to update email,gender otr enter new while updating then this is API level validation
+
+        const isAllowed_updates= Object.keys(data).every((k)=>
+        {
+            return ALLOWED_UPDATES.includes(k)
+        })
+     
+        if(!isAllowed_updates)
+        {
+            throw new  Error("updation not allowed")
+        }
+
+        if(data?.skills.length >4 || data?.skills.length <2  )
+        {
+            throw new Error("skills should be between 2 and 4")
+        }
+       
+
 const user=await User.findByIdAndUpdate({_id:id} ,data,{runValidators:true})  //by default runvalidators is off validate function run on new document not updations by default.we have to enable it on updates also
 res.send("updated success")
 }
+
 catch(err)
 {
     res.status(400).send("not found "+err.message)
