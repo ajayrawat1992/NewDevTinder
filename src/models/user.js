@@ -25,6 +25,7 @@ const userSchema=new mongoose.Schema({   //schema tells us the informationsof th
         required:true,
         unique:true,
         trim:true,
+        lowercase:true,
         validate(value)
         {
           if(!validator.isEmail(value))

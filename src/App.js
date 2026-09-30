@@ -1,12 +1,12 @@
 
 const express=require('express')
-  //const {AdminAuth,UserAuth}=require('./middlewares/Auth')
- const connectDb= require('./config/database')
-   const User=  require('./models/user')
+const connectDb= require('./config/database')
+const User=  require('./models/user')
 const { validateSignup } = require('./utils/validate')
- const bcrypt =  require('bcrypt')
-const app=express()
+const bcrypt =  require('bcrypt')
+const validator=require('validator')
 
+const app=express()
 app.use(express.json())     //this is the middleware which will run for all the methods and it converts incoming json datacoming from end user(who is hittng the API like browser,Postman) to js object   
 
 
@@ -31,14 +31,50 @@ res.send(user)
    }
    
 })
+
+app.post('/login',async(req,res)=>  // validation  while login
+{
+try{
+ const {emailid,password}=req.body
+
+ if(!validator.isEmail(emailid))
+ {
+    throw new Error("incorrect format")
+ }
+
+ const user= await User.findOne({emailid:emailid})
+ console.log(user);
+if(!user)
+{
+    throw new Error("invalid Credentials")
+}
+
+const ispasswordValid=await bcrypt.compare(password,user.password)
+if(!ispasswordValid)
+{
+      throw new Error("invalid Credentials")
+}
+else{
+    res.send("Login Successful !!")
+}
+
+}
+catch(err)
+{
+    res.status(400).send("ERROR : "+err.message)
+}
+})
+
+
 app.delete('/user',async (req,res)=>
 {
-    const id=req.body.userid
+    const id=req?.body?.userid
 
     try
     {
-         const user=await User.findByIdAndDelete({_id:id})
+         //const user=await User.findByIdAndDelete({_id:id})
         //const user=await User.findByIdAndDelete(id)
+        const user=await User.deleteMany({})  //to empty the collection
         res.send("deleted success")
     }
     catch(err)
