@@ -5,10 +5,12 @@ const User=  require('./models/user')
 const { validateSignup } = require('./utils/validate')
 const bcrypt =  require('bcrypt')
 const validator=require('validator')
+const cookieParser=require('cookie-parser')
+const jwt=require('jsonwebtoken')
 
 const app=express()
-app.use(express.json())     //this is the middleware which will run for all the methods and it converts incoming json datacoming from end user(who is hittng the API like browser,Postman) to js object   
-
+app.use(express.json())     //this is the middleware which will run for all the methods and it converts incoming json data coming from end user(who is hittng the API like browser,Postman) to js object   
+app.use(cookieParser())  // this is the middleware which will run for all the methods and it converts incoming cookie data coming from end user(who is hittng the API /profile) to js object
 
 
 app.get('/user',async (req,res)=>
@@ -55,6 +57,13 @@ if(!ispasswordValid)
       throw new Error("invalid Credentials")
 }
 else{
+
+    //res.cookie('token',"xjhAHsfxhjackbckjbcbCVBSKJCVBKSBCV")        //dummhy token
+     
+    const token= await jwt.sign({_id:user._id},"Newdevtinder@123")    //creating token using jwt.sign() method and passing payload and secret key as arguments
+    //console.log(token);
+
+res.cookie('token',token)              //sending token to the user in the form of cookie
     res.send("Login Successful !!")
 }
 
@@ -65,6 +74,35 @@ catch(err)
 }
 })
 
+
+app.get('/profile',async (req,res)=>
+{
+   try{
+     const {token}=req.cookies          // accessing the token from the cookies  //here we cookie-parser middleware is used to access the cookies from the request object
+    //console.log(cookie.token);
+    if(!token)
+    {
+        throw new Error("unauthorised access")
+    }
+
+      const decoded=jwt.verify(token,"Newdevtinder@123")    // validating  the token using jwt.verify() method and passing token and secret key as arguments
+         //console.log("decode ", decoded);
+      
+         const {_id}=decoded
+        
+        
+         const user= await User.findById(_id)
+         
+         if(!user)
+         {
+             throw new Error("user not found")
+         }
+    res.send(user)}
+    catch(err)
+    {
+        res.status(400).send("ERROR : "+err.message)
+    }
+})
 
 app.delete('/user',async (req,res)=>
 {
