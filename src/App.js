@@ -7,6 +7,7 @@ const bcrypt =  require('bcrypt')
 const validator=require('validator')
 const cookieParser=require('cookie-parser')
 const jwt=require('jsonwebtoken')
+const {UserAuth} =require('./middlewares/Auth')
 
 const app=express()
 app.use(express.json())     //this is the middleware which will run for all the methods and it converts incoming json data coming from end user(who is hittng the API like browser,Postman) to js object   
@@ -37,7 +38,7 @@ res.send(user)
 app.post('/login',async(req,res)=>  // validation  while login
 {
 try{
- const {emailid,password}=req.body
+ const {emailid,password}=req.body  //req.body will be undefined if we dont use express.json() middleware as it parses the incoming json data to js object and then we can access it using req.body
 
  if(!validator.isEmail(emailid))
  {
@@ -45,7 +46,7 @@ try{
  }
 
  const user= await User.findOne({emailid:emailid})
- console.log(user);
+          //console.log(user);
 if(!user)
 {
     throw new Error("invalid Credentials")
@@ -60,10 +61,10 @@ else{
 
     //res.cookie('token',"xjhAHsfxhjackbckjbcbCVBSKJCVBKSBCV")        //dummhy token
      
-    const token= await jwt.sign({_id:user._id},"Newdevtinder@123")    //creating token using jwt.sign() method and passing payload and secret key as arguments
+    const token= await jwt.sign({_id:user._id},"Newdevtinder@123",{expiresIn :'1hr'})    //creating token using jwt.sign() method and passing payload and secret key as arguments
     //console.log(token);
 
-res.cookie('token',token)              //sending token to the user in the form of cookie
+res.cookie('token',token,{maxAge:60000})      //sending token to the user in the form of cookie
     res.send("Login Successful !!")
 }
 
@@ -75,33 +76,22 @@ catch(err)
 })
 
 
-app.get('/profile',async (req,res)=>
+app.get('/profile',UserAuth,async (req,res)=>
 {
    try{
-     const {token}=req.cookies          // accessing the token from the cookies  //here we cookie-parser middleware is used to access the cookies from the request object
-    //console.log(cookie.token);
-    if(!token)
-    {
-        throw new Error("unauthorised access")
+        const user=req.user          // we can access the user object attached to the request object in the UserAuth middleware 
+    res.send(user)
     }
-
-      const decoded=jwt.verify(token,"Newdevtinder@123")    // validating  the token using jwt.verify() method and passing token and secret key as arguments
-         //console.log("decode ", decoded);
-      
-         const {_id}=decoded
-        
-        
-         const user= await User.findById(_id)
-         
-         if(!user)
-         {
-             throw new Error("user not found")
-         }
-    res.send(user)}
     catch(err)
     {
         res.status(400).send("ERROR : "+err.message)
     }
+})
+
+app.post('/sendconnectionrequest',UserAuth,(req,res)=>
+{
+     const user=req.user
+    res.send(  user.firstName  +" sent connection request  successfully")
 })
 
 app.delete('/user',async (req,res)=>
