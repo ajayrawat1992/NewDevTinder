@@ -52,7 +52,7 @@ if(!user)
     throw new Error("invalid Credentials")
 }
 
-const ispasswordValid=await bcrypt.compare(password,user.password)
+const ispasswordValid= await user.validatePassword(password)  // we have created a method in userSchema to validate password and we are calling that method here to validate password
 if(!ispasswordValid)
 {
       throw new Error("invalid Credentials")
@@ -61,10 +61,11 @@ else{
 
     //res.cookie('token',"xjhAHsfxhjackbckjbcbCVBSKJCVBKSBCV")        //dummhy token
      
-    const token= await jwt.sign({_id:user._id},"Newdevtinder@123",{expiresIn :'1hr'})    //creating token using jwt.sign() method and passing payload and secret key as arguments
+   // const token= await jwt.sign({_id:user._id},"Newdevtinder@123",{expiresIn :'1hr'})    //creating token using jwt.sign() method and passing payload and secret key as arguments
     //console.log(token);
+      const token= await user.getJWT()  // we have created a method in userSchema to generate token and we are calling that method here to generate token
 
-res.cookie('token',token,{maxAge:60000})      //sending token to the user in the form of cookie
+     res.cookie('token',token,{maxAge:60000})      //sending token to the user in the form of cookie  //cookie will expire in 1 min
     res.send("Login Successful !!")
 }
 

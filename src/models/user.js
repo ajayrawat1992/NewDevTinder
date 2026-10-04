@@ -2,6 +2,8 @@
 
 const mongoose=require('mongoose')
 const validator=require('validator')
+const bcrypt = require('bcrypt')
+const jwt=require('jsonwebtoken')
 
 
 const userSchema=new mongoose.Schema({   //schema tells us the informationsof the user that we are storing in database.
@@ -76,5 +78,22 @@ const userSchema=new mongoose.Schema({   //schema tells us the informationsof th
     }
 
 },{timestamps:true})
+
+
+userSchema.methods.getJWT= async function()
+{
+    const user=this
+    const token= await jwt.sign({_id:user._id},"Newdevtinder@123",{expiresIn :'1hr'})
+
+    return token
+}
+
+
+userSchema.methods.validatePassword= async function(passwordInputByUser)
+{
+    const user=this     
+    const isPasswordValid= await bcrypt.compare(passwordInputByUser,user.password)  // dont interchange the order of the arguments in bcrypt.compare() method as it will give wrong result if we change the order of the arguments
+    return isPasswordValid
+}
 
 module.exports=mongoose.model('User',userSchema)    // we insert any user under this model 
