@@ -91,7 +91,7 @@ userSchema.methods.getJWT= async function()
 
 userSchema.methods.validatePassword= async function(passwordInputByUser)
 {
-    const user=this     
+    const user=this
     const isPasswordValid= await bcrypt.compare(passwordInputByUser,user.password)  // dont interchange the order of the arguments in bcrypt.compare() method as it will give wrong result if we change the order of the arguments
     return isPasswordValid
 }

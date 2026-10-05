@@ -2,17 +2,22 @@
 const express=require('express')
 const connectDb= require('./config/database')
 const User=  require('./models/user')
-const { validateSignup } = require('./utils/validate')
-const bcrypt =  require('bcrypt')
-const validator=require('validator')
+
 const cookieParser=require('cookie-parser')
-const jwt=require('jsonwebtoken')
-const {UserAuth} =require('./middlewares/Auth')
+//const jwt=require('jsonwebtoken')
+//const {UserAuth} =require('./middlewares/Auth')
 
 const app=express()
 app.use(express.json())     //this is the middleware which will run for all the methods and it converts incoming json data coming from end user(who is hittng the API like browser,Postman) to js object   
 app.use(cookieParser())  // this is the middleware which will run for all the methods and it converts incoming cookie data coming from end user(who is hittng the API /profile) to js object
 
+const authRouter=require('./routes/auth')
+const profileRouter=require('./routes/profile')
+const requestRouter=require('./routes/request')
+
+app.use('/',authRouter)      //Use the router object authRouter.For every incoming request whose path starts with / and pass it to the routes defined inside authRouter
+app.use('/',profileRouter)
+app.use('/',requestRouter)
 
 app.get('/user',async (req,res)=>
 {
@@ -33,66 +38,6 @@ res.send(user)
    res.status(400).send("something went wrong ")
    }
    
-})
-
-app.post('/login',async(req,res)=>  // validation  while login
-{
-try{
- const {emailid,password}=req.body  //req.body will be undefined if we dont use express.json() middleware as it parses the incoming json data to js object and then we can access it using req.body
-
- if(!validator.isEmail(emailid))
- {
-    throw new Error("incorrect format")
- }
-
- const user= await User.findOne({emailid:emailid})
-          //console.log(user);
-if(!user)
-{
-    throw new Error("invalid Credentials")
-}
-
-const ispasswordValid= await user.validatePassword(password)  // we have created a method in userSchema to validate password and we are calling that method here to validate password
-if(!ispasswordValid)
-{
-      throw new Error("invalid Credentials")
-}
-else{
-
-    //res.cookie('token',"xjhAHsfxhjackbckjbcbCVBSKJCVBKSBCV")        //dummhy token
-     
-   // const token= await jwt.sign({_id:user._id},"Newdevtinder@123",{expiresIn :'1hr'})    //creating token using jwt.sign() method and passing payload and secret key as arguments
-    //console.log(token);
-      const token= await user.getJWT()  // we have created a method in userSchema to generate token and we are calling that method here to generate token
-
-     res.cookie('token',token,{maxAge:60000})      //sending token to the user in the form of cookie  //cookie will expire in 1 min
-    res.send("Login Successful !!")
-}
-
-}
-catch(err)
-{
-    res.status(400).send("ERROR : "+err.message)
-}
-})
-
-
-app.get('/profile',UserAuth,async (req,res)=>
-{
-   try{
-        const user=req.user          // we can access the user object attached to the request object in the UserAuth middleware 
-    res.send(user)
-    }
-    catch(err)
-    {
-        res.status(400).send("ERROR : "+err.message)
-    }
-})
-
-app.post('/sendconnectionrequest',UserAuth,(req,res)=>
-{
-     const user=req.user
-    res.send(  user.firstName  +" sent connection request  successfully")
 })
 
 app.delete('/user',async (req,res)=>
@@ -120,27 +65,6 @@ const users=await User.find({})
     res.status(400).send("something serios went wrong" +err.message)
   }
 })
-
-app.post('/signup',async(req,res)=>
-    {
-         try{                 // always wrap inside try catch block whenever making any database connections.
-  //1.validation of  data
-      validateSignup(req)   // this is way of validation.to make a helper function and put all validations in it .
-      const {firstName,lastName,emailid,password}=req.body
-
-      //2. encrypting the password
-    const hashPassword=await bcrypt.hash(password,10)    // encrypting the password
-      
-        //const user=new User(req.body);  // this is the  bad way of writing
-                  const user=new User({
-                    firstName,lastName,emailid,password:hashPassword
-                  });             
-         await user.save()          // it returns promise .so we used async await
-         res.send("saved successfully")
-      }
-      catch(err){res.status(500).send("ERROR : " + err.message)}
-    })
-
 
 app.patch('/user/:userid',async(req,res)=>  // we can pass the userid in url as  example in this case as userid cant be updated
     {
@@ -177,17 +101,7 @@ catch(err)
 {
     res.status(400).send("not found "+err.message)
 }
-    })
-
-
-
-
-
-
-
-
-
-
+})
 
 
 
