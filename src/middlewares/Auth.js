@@ -3,7 +3,6 @@ const User=require('../models/user')
 
 const UserAuth= async (req,res,next)=>
 {
-
    try{ 
     const {token}=req.cookies  // accessing the token from the cookies  //here we cookie-parser middleware is used to access the cookies from the request object
     if(!token)
@@ -11,7 +10,7 @@ const UserAuth= async (req,res,next)=>
         throw new Error("unauthorised access")
     }
 
-    const decoded=await jwt.verify(token,"Newdevtinder@123")  // validating  the token using jwt.verify() method and passing token and secret key as arguments
+    const decoded = await jwt.verify(token,"Newdevtinder@123")  // validating  the token using jwt.verify() method and passing token and secret key as arguments
        const {_id}=decoded
        
        const user=await User.findById(_id)
@@ -26,7 +25,6 @@ const UserAuth= async (req,res,next)=>
    {
     res.status(400).send("ERROR : "+err.message)
    }
-
 }
 
 module.exports={UserAuth}

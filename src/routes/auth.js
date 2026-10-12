@@ -1,12 +1,13 @@
-
-
 const express = require('express');
 const { validateSignup } = require('../utils/validate')
 const bcrypt =  require('bcrypt')
 const validator=require('validator')
- const User=  require('../models/user')
+const User=  require('../models/user')
+
 
 const authRouter=express.Router()
+
+
 
 authRouter.post('/signup',async(req,res)=>
     {
@@ -27,7 +28,6 @@ authRouter.post('/signup',async(req,res)=>
       }
       catch(err){res.status(500).send("ERROR : " + err.message)}
     })
-
     
 authRouter.post('/login',async(req,res)=>  // validation  while login
     {
@@ -40,7 +40,7 @@ authRouter.post('/login',async(req,res)=>  // validation  while login
      }
     
      const user= await User.findOne({emailid:emailid})
-              //console.log(user);
+            
     if(!user)
     {
         throw new Error("invalid Credentials")
@@ -49,7 +49,7 @@ authRouter.post('/login',async(req,res)=>  // validation  while login
     const ispasswordValid= await user.validatePassword(password)  // we have created a method in userSchema to validate password and we are calling that method here to validate password
     if(!ispasswordValid)
     {
-          throw new Error("invalid Credentials")
+          throw new Error("invalid Credentials") 
     }
     else{
     
@@ -68,6 +68,13 @@ authRouter.post('/login',async(req,res)=>  // validation  while login
     {
         res.status(400).send("ERROR : "+err.message)
     }
+    })
+
+    authRouter.post('/logout',(req,res)=>
+    {
+          // res.cookie('token',null,{expires:new Date(Date.now())})
+            res.clearCookie('token')  // this will clear the cookie from the browser
+           res.send("logout successful")
     })
 
 
