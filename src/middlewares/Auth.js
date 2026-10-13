@@ -7,7 +7,7 @@ const UserAuth= async (req,res,next)=>
     const {token}=req.cookies  // accessing the token from the cookies  //here we cookie-parser middleware is used to access the cookies from the request object
     if(!token)
     {
-        throw new Error("unauthorised access")
+        return res.status(401).json({message:"unauthorized Access"})
     }
 
     const decoded = await jwt.verify(token,"Newdevtinder@123")  // validating  the token using jwt.verify() method and passing token and secret key as arguments

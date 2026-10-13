@@ -1,20 +1,23 @@
 
 const mongoose=require('mongoose')
+const User=  require('./user')
 
 
 const connectionRequestSchema=new mongoose.Schema({
     senderId:{
      type:mongoose.Schema.Types.ObjectId,
      required:true,
+     ref:'User'  // reference to User collection
     },    
     receiverId:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
+        ref:'User'
     },
     status:{
         type:String,
         enum:{
-      values:["ignored","interested","accepted","rejected"],
+      values:["ignored","interested","accepted","rejected"],  
       message:`{VALUE} is not supported`
         }
     }},{timestamps:true})

@@ -1,8 +1,9 @@
-
 const express=require('express')
 const {UserAuth}=  require('../middlewares/Auth')
 const ConnectionRequest=   require('../models/connectionRequest')
 const User=require('../models/user')
+const authRouter = require('./auth')
+
 const requestRouter=express.Router()
 
 
@@ -32,7 +33,7 @@ try{    const senderId=req.user._id
       const existingConnectionRequest=await ConnectionRequest.findOne({  //this query becomes expensive(slow as our database size is huge) as it needs to check both senderId and receiverId in both directions. To optimize this query, we can create a compound index on the senderId and receiverId fields in the ConnectionRequest schema. This will allow MongoDB to quickly find documents that match either of the two conditions in the $or operator.
         $or:[
           {senderId:receiverId,receiverId:senderId},
-          {senderId:senderId,receiverId:receiverId}
+          {senderId,receiverId}
         ]
       })
 
@@ -51,5 +52,44 @@ catch(err)
     res.status(400).send("ERROR : "+err.message)
 }
 })
+
+
+requestRouter.post('/request/review/:status/:requestId',UserAuth,async (req,res)=>
+{
+     try{
+      const loggedInUser=req.user      
+      const {status,requestId}=req.params
+
+     const Allowed_Updates=['accepted','rejected']
+     if(!Allowed_Updates.includes(status))
+     {
+     return  res.status(400).json({message:"status not allowed"})
+     }
+
+     const connectionrequest=await ConnectionRequest.findOne({
+       _id:requestId,              //requestId tells the route which specific connection-request record the user wants to accept or reject
+       receiverId:loggedInUser._id,
+       status:"interested"
+     })
+
+     if(!connectionrequest)
+     {
+      return res.status(404).json({message:"connection request not found"})
+     }
+
+     connectionrequest.status=status;
+
+     const data=await connectionrequest.save()
+     res.json({message:"cpnnection request "+status ,data})
+    }
+   catch(err)
+   {
+   res.send("ERROR : "+err.message)
+   }
+ 
+
+})
+
+
 
 module.exports=requestRouter

@@ -24,7 +24,7 @@ authRouter.post('/signup',async(req,res)=>
                     firstName,lastName,emailid,password:hashPassword
                   });             
          await user.save()          // it returns promise .so we used async await
-         res.send("saved successfully")
+         res.status(201).json( {message:"user created successfully"})
       }
       catch(err){res.status(500).send("ERROR : " + err.message)}
     })
@@ -70,7 +70,7 @@ authRouter.post('/login',async(req,res)=>  // validation  while login
     }
     })
 
-    authRouter.post('/logout',(req,res)=>
+authRouter.post('/logout',(req,res)=>
     {
           // res.cookie('token',null,{expires:new Date(Date.now())})
             res.clearCookie('token')  // this will clear the cookie from the browser
